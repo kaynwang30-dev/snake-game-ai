@@ -6,6 +6,16 @@ class UIManager {
     constructor(game) {
         this.game = game;
         this.currentScreen = 'main-menu';
+        this.isMobile = this._detectMobile();
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchStartTime = 0;
+    }
+
+    // 检测移动端
+    _detectMobile() {
+        return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || (window.innerWidth <= 768 && 'ontouchstart' in window);
     }
 
     // 显示屏幕
@@ -99,6 +109,11 @@ class UIManager {
         });
 
         // ==========================================
+        // 移动端触摸控制
+        // ==========================================
+        this._initMobileControls();
+
+        // ==========================================
         // 游戏回调
         // ==========================================
         this.game.onGameOver = (data) => {
@@ -106,7 +121,6 @@ class UIManager {
         };
 
         this.game.onScoreUpdate = (snake) => {
-            // 分数更新动画
             if (snake.isPlayer) {
                 const el = document.getElementById('player-score');
                 if (el) {
@@ -119,6 +133,122 @@ class UIManager {
                 }
             }
         };
+    }
+
+    // ==========================================
+    // 移动端触摸控制
+    // ==========================================
+    _initMobileControls() {
+        // 虚拟方向键
+        const dpadBtns = document.querySelectorAll('.dpad-btn[data-dir]');
+        dpadBtns.forEach(btn => {
+            // 触摸开始
+            const handleStart = (e) => {
+                e.preventDefault();
+                btn.classList.add('active');
+                this._handleDpadInput(btn.dataset.dir);
+            };
+            // 触摸结束
+            const handleEnd = (e) => {
+                e.preventDefault();
+                btn.classList.remove('active');
+            };
+
+            btn.addEventListener('touchstart', handleStart, { passive: false });
+            btn.addEventListener('touchend', handleEnd, { passive: false });
+            btn.addEventListener('touchcancel', handleEnd, { passive: false });
+            // 也支持鼠标（调试用）
+            btn.addEventListener('mousedown', handleStart);
+            btn.addEventListener('mouseup', handleEnd);
+            btn.addEventListener('mouseleave', handleEnd);
+        });
+
+        // 移动端暂停键
+        const mobilePause = document.getElementById('mobile-pause');
+        if (mobilePause) {
+            mobilePause.addEventListener('click', () => {
+                if (this.game.state === 'playing' || this.game.state === 'paused') {
+                    this.game.togglePause();
+                }
+            });
+        }
+
+        // 画布区域滑动手势
+        const canvasWrapper = document.getElementById('game-canvas-wrapper');
+        
+        canvasWrapper.addEventListener('touchstart', (e) => {
+            if (this.game.state !== 'playing') return;
+            const touch = e.touches[0];
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+            this.touchStartTime = Date.now();
+        }, { passive: true });
+
+        canvasWrapper.addEventListener('touchend', (e) => {
+            if (this.game.state !== 'playing') return;
+            const touch = e.changedTouches[0];
+            const dx = touch.clientX - this.touchStartX;
+            const dy = touch.clientY - this.touchStartY;
+            const dt = Date.now() - this.touchStartTime;
+            
+            // 最小滑动距离和最大时间限制
+            const minDist = 20;
+            const maxTime = 500;
+            
+            if (dt > maxTime) return;
+            
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+            
+            if (Math.max(absDx, absDy) < minDist) return;
+            
+            if (absDx > absDy) {
+                // 水平滑动
+                this._handleDpadInput(dx > 0 ? 'right' : 'left');
+            } else {
+                // 垂直滑动
+                this._handleDpadInput(dy > 0 ? 'down' : 'up');
+            }
+        }, { passive: true });
+
+        // 阻止画布区域默认的触摸行为（防止滚动）
+        canvasWrapper.addEventListener('touchmove', (e) => {
+            if (this.currentScreen === 'game-screen') {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    }
+
+    // 处理方向键输入
+    _handleDpadInput(dir) {
+        if (!this.game.playerSnake || !this.game.playerSnake.alive) return;
+        if (this.game.state !== 'playing') return;
+
+        switch (dir) {
+            case 'up':
+                this.game.handleInput('ArrowUp');
+                break;
+            case 'down':
+                this.game.handleInput('ArrowDown');
+                break;
+            case 'left':
+                this.game.handleInput('ArrowLeft');
+                break;
+            case 'right':
+                this.game.handleInput('ArrowRight');
+                break;
+        }
+    }
+
+    // 显示/隐藏移动端控制器
+    _showMobileControls(show) {
+        const controls = document.getElementById('mobile-controls');
+        if (!controls) return;
+        if (show && this.isMobile) {
+            controls.classList.remove('hidden');
+        } else {
+            controls.classList.add('hidden');
+        }
     }
 
     // 绑定range实时显示
@@ -144,6 +274,11 @@ class UIManager {
 
         this.game.setConfig({ speed, aiCount, foodCount, obstacles, particles, sound });
         this.game._applyMapSize(mapSize);
+
+        // 移动端自动缩小地图
+        if (this.isMobile && mapSize !== 'small') {
+            this.game._applyMapSize('small');
+        }
         
         Sound.enabled = sound;
         Particles.enabled = particles;
@@ -151,6 +286,9 @@ class UIManager {
 
     // 开始游戏
     _startGame(mode) {
+        // 重新检测移动端（可能旋转屏幕后尺寸变化）
+        this.isMobile = this._detectMobile();
+
         this._saveSettings();
         Sound.init();
         
@@ -165,14 +303,17 @@ class UIManager {
             aiPanel.classList.add('hidden');
             leaderboard.classList.add('hidden');
             playerInfo.style.display = '';
+            this._showMobileControls(true);
         } else if (mode === 'vs-ai') {
             aiPanel.classList.remove('hidden');
             leaderboard.classList.remove('hidden');
             playerInfo.style.display = '';
+            this._showMobileControls(true);
         } else if (mode === 'ai-battle') {
             aiPanel.classList.remove('hidden');
             leaderboard.classList.remove('hidden');
             playerInfo.style.display = 'none';
+            this._showMobileControls(false); // AI混战不需要方向键
         }
 
         document.getElementById('game-overlay').classList.add('hidden');
@@ -191,12 +332,19 @@ class UIManager {
             this.showScreen('game-screen');
         }
         
-        this.game.init(this._lastMode || 'solo');
+        const mode = this._lastMode || 'solo';
+        // 重新显示移动端控制器
+        if (mode !== 'ai-battle') {
+            this._showMobileControls(true);
+        }
+        
+        this.game.init(mode);
     }
 
     // 退出游戏
     _quitGame() {
         this.game.destroy();
+        this._showMobileControls(false);
         document.getElementById('game-overlay').classList.add('hidden');
         this.showScreen('main-menu');
     }
@@ -241,6 +389,9 @@ class UIManager {
     // 显示游戏结束界面
     _showGameOver(data) {
         const { title, rankings, playerSnake, gameTime, mode } = data;
+
+        // 隐藏移动端控制器
+        this._showMobileControls(false);
 
         document.getElementById('gameover-title').textContent = title;
         document.getElementById('final-time').textContent = Utils.formatTime(gameTime);
