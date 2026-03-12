@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 极限贪吃蛇 - AI对战版</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- 粒子背景 -->
+        <canvas id="particle-bg"></canvas>
+        
+        <!-- 主菜单 -->
+        <div id="main-menu" class="screen active">
+            <div class="menu-container">
+                <div class="logo-section">
+                    <div class="logo-icon">🐍</div>
+                    <h1 class="game-title">极限贪吃蛇</h1>
+                    <p class="game-subtitle">AI BATTLE EDITION</p>
+                    <div class="title-decoration"></div>
+                </div>
+                <div class="menu-buttons">
+                    <button class="btn btn-primary" id="btn-solo">
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">单人模式</span>
+                        <span class="btn-desc">经典贪吃蛇体验</span>
+                    </button>
+                    <button class="btn btn-danger" id="btn-vs-ai">
+                        <span class="btn-icon">🤖</span>
+                        <span class="btn-text">AI对战</span>
+                        <span class="btn-desc">挑战智能AI蛇</span>
+                    </button>
+                    <button class="btn btn-info" id="btn-ai-battle">
+                        <span class="btn-icon">⚔️</span>
+                        <span class="btn-text">AI混战</span>
+                        <span class="btn-desc">观看AI蛇大混战</span>
+                    </button>
+                    <button class="btn btn-secondary" id="btn-settings">
+                        <span class="btn-icon">⚙️</span>
+                        <span class="btn-text">设置</span>
+                        <span class="btn-desc">自定义游戏参数</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置面板 -->
+        <div id="settings-screen" class="screen">
+            <div class="settings-container">
+                <h2 class="settings-title">⚙️ 游戏设置</h2>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>🗺️ 地图大小</label>
+                        <select id="setting-map-size">
+                            <option value="small">小 (30×20)</option>
+                            <option value="medium" selected>中 (40×30)</option>
+                            <option value="large">大 (60×40)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>⚡ 游戏速度</label>
+                        <input type="range" id="setting-speed" min="1" max="10" value="5">
+                        <span id="speed-value" class="range-value">5</span>
+                    </div>
+                    <div class="setting-group">
+                        <label>🤖 AI数量 (对战/混战)</label>
+                        <input type="range" id="setting-ai-count" min="1" max="6" value="3">
+                        <span id="ai-count-value" class="range-value">3</span>
+                    </div>
+                    <div class="setting-group">
+                        <label>🍎 食物数量</label>
+                        <input type="range" id="setting-food-count" min="3" max="20" value="8">
+                        <span id="food-count-value" class="range-value">8</span>
+                    </div>
+                    <div class="setting-group">
+                        <label>🧱 障碍物</label>
+                        <select id="setting-obstacles">
+                            <option value="none">无</option>
+                            <option value="few" selected>少量</option>
+                            <option value="many">大量</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>🎨 主题</label>
+                        <select id="setting-theme">
+                            <option value="cyber" selected>赛博朋克</option>
+                            <option value="nature">自然森林</option>
+                            <option value="retro">复古像素</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>🔊 音效</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-sound" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>🌀 粒子特效</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-particles" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button class="btn btn-primary" id="btn-save-settings">保存设置</button>
+                    <button class="btn btn-secondary" id="btn-back-menu">返回菜单</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div id="game-screen" class="screen">
+            <!-- 顶部HUD -->
+            <div id="game-hud">
+                <div class="hud-left">
+                    <div class="hud-item" id="hud-player-info">
+                        <span class="hud-icon">🐍</span>
+                        <span class="hud-label">玩家</span>
+                        <span class="hud-value" id="player-score">0</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-icon">📏</span>
+                        <span class="hud-label">长度</span>
+                        <span class="hud-value" id="player-length">3</span>
+                    </div>
+                </div>
+                <div class="hud-center">
+                    <div class="hud-timer" id="game-timer">00:00</div>
+                    <div class="hud-status" id="game-status">准备就绪</div>
+                </div>
+                <div class="hud-right">
+                    <button class="hud-btn" id="btn-pause" title="暂停">⏸️</button>
+                    <button class="hud-btn" id="btn-quit" title="退出">🚪</button>
+                </div>
+            </div>
+
+            <!-- 游戏画布 -->
+            <div id="game-canvas-wrapper">
+                <canvas id="game-canvas"></canvas>
+                <!-- 游戏内覆盖层 -->
+                <div id="game-overlay" class="hidden">
+                    <div class="overlay-content">
+                        <h2 id="overlay-title">暂停</h2>
+                        <p id="overlay-message"></p>
+                        <div class="overlay-buttons">
+                            <button class="btn btn-primary" id="btn-resume">继续游戏</button>
+                            <button class="btn btn-danger" id="btn-restart">重新开始</button>
+                            <button class="btn btn-secondary" id="btn-to-menu">返回菜单</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部AI状态面板 -->
+            <div id="ai-status-panel" class="hidden">
+                <div class="ai-panel-title">🤖 AI蛇状态</div>
+                <div id="ai-status-list"></div>
+            </div>
+
+            <!-- 排行榜侧边栏 -->
+            <div id="leaderboard-sidebar" class="hidden">
+                <div class="leaderboard-title">🏆 排行榜</div>
+                <div id="leaderboard-list"></div>
+            </div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div id="gameover-screen" class="screen">
+            <div class="gameover-container">
+                <h2 class="gameover-title" id="gameover-title">游戏结束</h2>
+                <div class="gameover-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-label">最终排名</div>
+                        <div class="stat-value" id="final-rank">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-label">得分</div>
+                        <div class="stat-value" id="final-score">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📏</div>
+                        <div class="stat-label">最大长度</div>
+                        <div class="stat-value" id="final-length">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-label">吃到食物</div>
+                        <div class="stat-value" id="final-food">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💀</div>
+                        <div class="stat-label">击杀数</div>
+                        <div class="stat-value" id="final-kills">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-label">存活时间</div>
+                        <div class="stat-value" id="final-time">00:00</div>
+                    </div>
+                </div>
+                <div id="final-leaderboard" class="final-leaderboard"></div>
+                <div class="gameover-actions">
+                    <button class="btn btn-primary" id="btn-play-again">再来一局</button>
+                    <button class="btn btn-secondary" id="btn-gameover-menu">返回菜单</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏脚本 -->
+    <script src="js/utils.js"></script>
+    <script src="js/sound.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/food.js"></script>
+    <script src="js/snake.js"></script>
+    <script src="js/ai-behavior-tree.js"></script>
+    <script src="js/ai-snake.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
