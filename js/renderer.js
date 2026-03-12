@@ -14,11 +14,17 @@ class GameRenderer {
 
     // 设置画布大小
     resize(cols, rows) {
-        const maxW = window.innerWidth - 40;
-        const maxH = window.innerHeight - 140;
+        const isMobile = window.innerWidth <= 768;
+        const hudHeight = isMobile ? 44 : 60;
+        // 移动端底部留出方向键空间
+        const controlsHeight = isMobile ? 170 : 0;
+        const padding = isMobile ? 10 : 40;
+        
+        const maxW = window.innerWidth - padding;
+        const maxH = window.innerHeight - hudHeight - controlsHeight - (isMobile ? 10 : 80);
         
         this.cellSize = Math.floor(Math.min(maxW / cols, maxH / rows));
-        this.cellSize = Math.max(10, Math.min(24, this.cellSize));
+        this.cellSize = Math.max(6, Math.min(24, this.cellSize));
         
         this.canvas.width = cols * this.cellSize;
         this.canvas.height = rows * this.cellSize;
