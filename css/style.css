@@ -896,22 +896,228 @@ body {
 }
 
 /* ========================================
+   移动端虚拟方向键
+   ======================================== */
+#mobile-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+#mobile-controls.hidden {
+    display: none;
+}
+
+.dpad-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 4px;
+    width: 150px;
+    height: 150px;
+}
+
+.dpad-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 20, 60, 0.8);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 12px;
+    color: var(--primary);
+    font-size: 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    transition: background 0.1s, transform 0.1s;
+    backdrop-filter: blur(8px);
+}
+
+.dpad-btn:active, .dpad-btn.active {
+    background: rgba(0, 240, 255, 0.25);
+    border-color: var(--primary);
+    transform: scale(0.92);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+.dpad-up { grid-column: 2; grid-row: 1; border-radius: 12px 12px 4px 4px; }
+.dpad-left { grid-column: 1; grid-row: 2; border-radius: 12px 4px 4px 12px; }
+.dpad-center { 
+    grid-column: 2; grid-row: 2; 
+    font-size: 24px; 
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.15);
+    pointer-events: none;
+}
+.dpad-right { grid-column: 3; grid-row: 2; border-radius: 4px 12px 12px 4px; }
+.dpad-down { grid-column: 2; grid-row: 3; border-radius: 4px 4px 12px 12px; }
+
+.mobile-action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-action-btn {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 20, 60, 0.8);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    backdrop-filter: blur(8px);
+    transition: background 0.1s;
+}
+
+.mobile-action-btn:active {
+    background: rgba(0, 240, 255, 0.25);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+/* ========================================
    响应式
    ======================================== */
 @media (max-width: 768px) {
-    .game-title { font-size: 36px; }
-    .game-subtitle { font-size: 12px; letter-spacing: 4px; }
+    .game-title { font-size: 32px; letter-spacing: 2px; }
+    .game-subtitle { font-size: 11px; letter-spacing: 4px; }
     .logo-icon { font-size: 50px; }
-    .menu-buttons { max-width: 320px; }
-    .btn { padding: 12px 16px; }
-    .btn-icon { font-size: 22px; }
+    .logo-section { margin-bottom: 24px; }
+    .menu-buttons { max-width: 300px; gap: 10px; }
+    .btn { padding: 12px 14px; gap: 10px; }
+    .btn-icon { font-size: 22px; width: 32px; }
     .btn-text { font-size: 16px; }
-    .settings-grid { grid-template-columns: 1fr; }
-    .gameover-stats { grid-template-columns: repeat(2, 1fr); }
-    .gameover-title { font-size: 32px; }
+    .btn-desc { font-size: 11px; }
+    
+    .settings-container { padding: 20px; width: 95%; max-height: 90vh; }
+    .settings-title { font-size: 22px; margin-bottom: 16px; }
+    .settings-grid { grid-template-columns: 1fr; gap: 14px; }
+    .settings-actions { flex-direction: column; gap: 8px; }
+    .settings-actions .btn { width: 100%; justify-content: center; }
+    
+    #game-hud { padding: 4px 10px; min-height: 40px; flex-wrap: nowrap; }
+    .hud-left, .hud-right { gap: 8px; }
+    .hud-icon { font-size: 14px; }
+    .hud-label { font-size: 10px; }
+    .hud-value { font-size: 14px; min-width: 28px; }
+    .hud-timer { font-size: 16px; }
+    .hud-status { font-size: 9px; letter-spacing: 1px; }
+    .hud-btn { padding: 4px 8px; font-size: 14px; }
     
     #ai-status-panel {
-        max-width: 160px;
-        font-size: 10px;
+        bottom: auto;
+        top: 45px;
+        left: 5px;
+        max-width: 140px;
+        padding: 6px 8px;
+        font-size: 9px;
+        opacity: 0.85;
     }
+    .ai-panel-title { font-size: 10px; margin-bottom: 4px; }
+    .ai-status-item { gap: 4px; padding: 2px 0; font-size: 10px; }
+    .ai-color-dot { width: 7px; height: 7px; }
+    .ai-score { font-size: 9px; }
+    .ai-behavior { font-size: 8px; padding: 1px 3px; }
+    
+    #leaderboard-sidebar {
+        top: 45px;
+        right: 5px;
+        min-width: 120px;
+        padding: 6px 8px;
+        opacity: 0.85;
+    }
+    .leaderboard-title { font-size: 10px; margin-bottom: 4px; }
+    .lb-item { gap: 4px; padding: 2px 0; font-size: 11px; }
+    .lb-rank { font-size: 10px; width: 16px; }
+    .lb-color { width: 6px; height: 6px; }
+    .lb-name { font-size: 10px; }
+    .lb-score { font-size: 9px; }
+    
+    .gameover-container { width: 95%; }
+    .gameover-title { font-size: 28px; margin-bottom: 16px; }
+    .gameover-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-card { padding: 12px 8px; }
+    .stat-icon { font-size: 20px; margin-bottom: 4px; }
+    .stat-label { font-size: 10px; }
+    .stat-value { font-size: 18px; }
+    .final-leaderboard { padding: 12px; max-height: 130px; }
+    .final-lb-item { gap: 8px; padding: 6px 8px; }
+    .final-lb-rank { font-size: 14px; width: 24px; }
+    .final-lb-name { font-size: 13px; }
+    .final-lb-score { font-size: 11px; }
+    .gameover-actions { gap: 10px; }
+    .gameover-actions .btn { padding: 12px 20px; font-size: 15px; }
+    
+    .overlay-content { padding: 24px 16px; }
+    .overlay-content h2 { font-size: 26px; }
+    .overlay-content p { font-size: 14px; margin-bottom: 16px; }
+    .overlay-buttons { flex-direction: column; gap: 8px; }
+    .overlay-buttons .btn { min-width: 100%; padding: 12px 20px; justify-content: center; }
+    
+    .countdown-number { font-size: 80px; }
+}
+
+@media (max-width: 480px) {
+    .game-title { font-size: 26px; }
+    .game-subtitle { font-size: 10px; letter-spacing: 3px; }
+    .logo-icon { font-size: 40px; }
+    .logo-section { margin-bottom: 16px; }
+    .menu-buttons { max-width: 280px; }
+    
+    .gameover-stats { grid-template-columns: repeat(2, 1fr); }
+    
+    .dpad-container { width: 130px; height: 130px; }
+    .dpad-btn { font-size: 18px; border-radius: 10px; }
+    .dpad-center { font-size: 20px; }
+    .mobile-action-btn { width: 44px; height: 44px; font-size: 18px; }
+    
+    #ai-status-panel { max-width: 120px; }
+    #leaderboard-sidebar { min-width: 100px; }
+}
+
+@media (max-height: 600px) {
+    .logo-section { margin-bottom: 12px; }
+    .logo-icon { font-size: 36px; }
+    .game-title { font-size: 24px; }
+    .game-subtitle { font-size: 9px; }
+    .title-decoration { margin: 8px auto; }
+    .menu-buttons { gap: 6px; }
+    .btn { padding: 8px 12px; }
+    .btn-icon { font-size: 18px; }
+    .btn-text { font-size: 14px; }
+    .btn-desc { font-size: 10px; }
+    
+    .dpad-container { width: 120px; height: 120px; }
+    .dpad-btn { font-size: 16px; }
+    .gameover-stats { gap: 6px; }
+    .stat-card { padding: 8px 6px; }
+}
+
+/* 横屏移动端 */
+@media (max-height: 500px) and (orientation: landscape) {
+    #game-hud { padding: 2px 10px; min-height: 32px; }
+    .hud-timer { font-size: 14px; }
+    .hud-value { font-size: 12px; }
+    .hud-label { display: none; }
+    
+    #mobile-controls { bottom: 5px; }
+    .dpad-container { width: 100px; height: 100px; }
+    .dpad-btn { font-size: 14px; }
+    .dpad-center { font-size: 16px; }
+    .mobile-action-btn { width: 36px; height: 36px; font-size: 16px; }
+    
+    #ai-status-panel { display: none !important; }
+    #leaderboard-sidebar { top: 36px; }
 }
