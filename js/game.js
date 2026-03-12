@@ -49,10 +49,20 @@ class Game {
 
     // 应用地图大小
     _applyMapSize(size) {
-        switch (size) {
-            case 'small': this.config.cols = 30; this.config.rows = 20; break;
-            case 'medium': this.config.cols = 40; this.config.rows = 30; break;
-            case 'large': this.config.cols = 60; this.config.rows = 40; break;
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            // 移动端使用更小的地图
+            switch (size) {
+                case 'small': this.config.cols = 20; this.config.rows = 15; break;
+                case 'medium': this.config.cols = 25; this.config.rows = 18; break;
+                case 'large': this.config.cols = 30; this.config.rows = 20; break;
+            }
+        } else {
+            switch (size) {
+                case 'small': this.config.cols = 30; this.config.rows = 20; break;
+                case 'medium': this.config.cols = 40; this.config.rows = 30; break;
+                case 'large': this.config.cols = 60; this.config.rows = 40; break;
+            }
         }
     }
 
