@@ -2,7 +2,11 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0a1a">
     <title>🐍 极限贪吃蛇 - AI对战版</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
@@ -152,6 +156,20 @@
                             <button class="btn btn-secondary" id="btn-to-menu">返回菜单</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- 移动端虚拟方向键 -->
+            <div id="mobile-controls" class="hidden">
+                <div class="dpad-container">
+                    <button class="dpad-btn dpad-up" data-dir="up">▲</button>
+                    <button class="dpad-btn dpad-left" data-dir="left">◀</button>
+                    <button class="dpad-btn dpad-center">🐍</button>
+                    <button class="dpad-btn dpad-right" data-dir="right">▶</button>
+                    <button class="dpad-btn dpad-down" data-dir="down">▼</button>
+                </div>
+                <div class="mobile-action-btns">
+                    <button class="mobile-action-btn" id="mobile-pause">⏸️</button>
                 </div>
             </div>
 
